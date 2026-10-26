@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breach Protocol Lesson 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#0c111c; --panel:#141b2b; --panel2:#1b2438; --line:#2a3550;
+  --text:#e9edf5; --muted:#9aa6bd; --amber:#ffb547; --teal:#3ad6c5;
+  --red:#ff4d5e; --green:#4ade80; --violet:#a78bfa; --blue:#60a5fa;
+  --head:'Space Grotesk',system-ui,sans-serif; --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:18px;line-height:1.55;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+header .sec{color:var(--amber);font-weight:600}
+main{flex:1;overflow-y:auto;display:flex}
+.slide{display:none;width:100%;max-width:1000px;margin:auto;padding:36px 22px 40px}
+.slide.active{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+footer{flex-shrink:0;border-top:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:14px}
+.bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));width:0;transition:width .3s}
+button{font-family:var(--body);cursor:pointer}
+.nav{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 18px;font-size:15px;font-weight:600}
+.nav:hover{border-color:var(--teal)}
+.nav:disabled{opacity:.35;cursor:default}
+#count{font-family:var(--mono);font-size:13px;color:var(--muted);min-width:64px;text-align:center}
+
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0 0 14px}
+h1{font-size:clamp(2.2rem,5.5vw,3.8rem)}
+h2{font-size:clamp(1.7rem,3.6vw,2.5rem)}
+h3{font-size:1.25rem}
+p{margin:0 0 14px}
+.kicker{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.lead{font-size:1.2rem;color:#cfd6e4;max-width:760px}
+.muted{color:var(--muted)}
+.amber{color:var(--amber)} .red{color:var(--red)} .green{color:var(--green)} .teal{color:var(--teal)}
+code{font-family:var(--mono);font-size:.88em;background:var(--panel2);padding:1px 6px;border-radius:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.proj{grid-template-columns:1fr!important}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{font-size:14px;padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.chip.big{font-size:16px;padding:8px 16px}
+.callout{border-left:4px solid var(--amber);background:var(--panel);padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.teal{border-color:var(--teal)} .callout.red{border-color:var(--red)} .callout.green{border-color:var(--green)}
+.num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#06231f;font-weight:700;font-family:var(--head);margin-right:10px;flex-shrink:0}
+.step{display:flex;align-items:flex-start;margin:12px 0}
+
+/* project slides */
+.proj{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:center}
+.art{background:radial-gradient(circle at 50% 40%,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.art svg{width:78%;height:78%}
+.blink{animation:blink 1s steps(2) infinite}
+.blink2{animation:blink 1s steps(2) .5s infinite}
+@keyframes blink{50%{opacity:.15}}
+.spin{transform-origin:center;transform-box:fill-box;animation:spin .4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* code */
+.code{position:relative;background:#0a0e17;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:15px;line-height:1.6}
+.code .copy{position:absolute;top:10px;right:10px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:5px 10px;border-radius:6px}
+.code .copy:hover{color:var(--text)}
+.tk{color:#c792ea}.tc{color:#ffcb6b}.tf{color:#82aaff}.tn{color:#f78c6c}.tm{color:#5c6b88;font-style:italic}.ts{color:#c3e88d}
+table{width:100%;border-collapse:collapse;font-size:16px;margin:12px 0}
+td,th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+
+/* reveal & quiz */
+.revealBtn{background:transparent;border:1px dashed var(--amber);color:var(--amber);padding:9px 16px;border-radius:8px;font-weight:600;font-size:15px;margin-top:6px}
+.revealBox{display:none;margin-top:14px}
+.revealBox.show{display:block;animation:in .3s}
+.q{margin:18px 0}
+.opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.opt{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:9px 16px;border-radius:8px;font-size:15px;font-family:var(--mono)}
+.opt.right{border-color:var(--green);background:#123321}
+.opt.wrong{border-color:var(--red);background:#3a141a}
+.qx{display:none;margin-top:8px;font-size:15px;color:#cfd6e4}
+.qx.show{display:block}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:10px 0}
+.check li{margin:10px 0}
+.check label{display:flex;gap:12px;cursor:pointer;align-items:flex-start}
+.check input{width:20px;height:20px;margin-top:4px;accent-color:var(--teal);flex-shrink:0}
+
+/* simulators */
+.sim{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:220px 1fr;gap:18px}
+@media(max-width:760px){.sim{grid-template-columns:1fr}}
+.wireBtn{width:100%;padding:22px 10px;border-radius:12px;border:2px solid var(--amber);background:#2a2110;color:var(--amber);font-weight:700;font-size:16px;user-select:none;touch-action:none}
+.wireBtn.down{background:var(--amber);color:#1a1205}
+.stats{display:flex;gap:16px;margin-top:12px;font-family:var(--mono);font-size:14px}
+.stats b{display:block;font-size:26px;color:var(--text)}
+.monitor{background:#05080e;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:14px;color:#9fe8a8;height:220px;overflow:hidden;padding:10px 12px;display:flex;flex-direction:column;justify-content:flex-end}
+.monitor .ttl{color:var(--muted);font-size:11px;letter-spacing:.1em;margin-bottom:auto}
+.small{font-size:14px}
+.resetBtn{background:none;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:6px;font-size:13px;margin-top:10px}
+
+/* Breach Protocol */
+.bp{--red:#ff3b55}
+.glitch{font-family:var(--mono);font-weight:600;font-size:clamp(2.6rem,8vw,5.4rem);letter-spacing:.06em;color:var(--red);text-shadow:3px 0 #3ad6c5,-3px 0 #ff3b55;animation:gl 2.4s infinite}
+@keyframes gl{0%,92%,100%{transform:none;text-shadow:3px 0 #3ad6c5,-3px 0 #ff3b55}93%{transform:translateX(-4px) skewX(8deg)}95%{transform:translateX(5px);text-shadow:-5px 0 #3ad6c5,5px 0 #ff3b55}97%{transform:none}}
+.bpPanel{background:#100a10;border:1px solid #4a1d28;border-radius:14px;padding:20px}
+.bpGame{background:#08060c;border:1px solid #4a1d28;border-radius:14px;padding:18px}
+.bpHud{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.bpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:460px;margin:0 auto}
+.bpNode{position:relative;aspect-ratio:1.4;border-radius:12px;background:#151020;border:2px solid #2c2340;color:var(--muted);font-family:var(--mono);font-size:12px;overflow:hidden}
+.bpNode .led{display:block;width:22px;height:22px;border-radius:50%;margin:10px auto 6px;background:#2a2030}
+.bpNode.armed{border-color:var(--red);color:#ffd2d8}
+.bpNode.armed .led{background:var(--red);box-shadow:0 0 18px var(--red)}
+.bpNode .timer{position:absolute;left:0;bottom:0;height:5px;background:var(--red);width:0}
+.bpNode.armed .timer{animation:drain var(--dur) linear forwards}
+@keyframes drain{from{width:100%}to{width:0}}
+.bpNode.hit{border-color:var(--green)} .bpNode.hit .led{background:var(--green);box-shadow:0 0 18px var(--green)}
+.bpNode.lost{border-color:#7a1626;background:#2a0c13}
+.bpTrack{position:relative;max-width:460px;margin:20px auto 6px;height:44px;border:1px dashed #4a1d28;border-radius:10px}
+.bpCar{position:absolute;top:6px;left:6px;width:44px;height:30px;transition:left .4s}
+.bpBase{position:absolute;right:6px;top:6px;height:30px;padding:0 10px;display:flex;align-items:center;border-radius:6px;background:#132a20;color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600}
+.bpStart{display:block;margin:14px auto 0;background:var(--red);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:16px}
+.bpMsg{text-align:center;font-family:var(--mono);min-height:24px;margin-top:10px}
+.stage{border-radius:12px;padding:16px;background:var(--panel);border:1px solid var(--line);position:relative}
+.stage.here{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.stage ol{margin:8px 0 0;padding-left:20px;font-size:15px}
+.stage li{margin:4px 0}
+.here-tag{font-family:var(--mono);font-size:11px;background:var(--amber);color:#1a1205;padding:2px 8px;border-radius:4px;font-weight:600}
+svg text{font-family:var(--body)}
+
+.code pre code{background:none;padding:0;font-size:inherit}
+input[type=range]{width:100%;accent-color:var(--amber)}
+.g-future{display:none}
+.g-now{filter:drop-shadow(0 0 5px #ffb547) drop-shadow(0 0 2px #ffb547)}
+.wireTbl td:first-child{white-space:nowrap}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:6px}
+.pwmLed{width:110px;height:110px;border-radius:50%;margin:8px auto;background:#ff4d5e;border:3px solid #ff8a96}
+.pwmWrap canvas{width:100%;height:140px;display:block;background:#05080e;border:1px solid var(--line);border-radius:10px}
+.nodeLed{width:120px;height:120px;border-radius:50%;margin:10px auto;background:#2a2030;border:3px solid #3a2a40;cursor:pointer}
+.rtBox{background:#08060c;border:1px solid #4a1d28;border-radius:14px;padding:20px;text-align:center;user-select:none;touch-action:none}
+.rtMsg{font-family:var(--mono);font-size:18px;min-height:28px;margin-top:8px}
+.rtStats{display:flex;justify-content:center;gap:28px;font-family:var(--mono);font-size:14px;margin-top:12px;color:var(--muted)}
+.rtStats b{display:block;font-size:24px;color:var(--text)}
+</style>
+</head>
+<body>
+<header><span class="sec" id="sec"></span><span>Advanced Robotics · Breach Protocol</span></header>
+<main id="main">
+
+<!-- ================= OPEN ================= -->
+<section class="slide" data-section="Lesson 4">
+  <div class="kicker">Breach Protocol · Lesson 4</div>
+  <h1>The threat LED.</h1>
+  <p class="lead">Today you finish the defense node. First, rebuild it from scratch. Then teach its LED to <span class="red"><b>pulse faster and faster</b></span> as an attack runs out of time, like a movie bomb timer.</p>
+  <div class="chips"><span class="chip">About 25 minutes</span><span class="chip">Rebuild the node circuit</span><span class="chip">PWM</span><span class="chip">analogWrite</span></div>
+</section>
+
+<section class="slide" data-section="Lesson 4">
+  <div class="kicker">Where we are</div>
+  <h2>Building the defense node</h2>
+  <div class="grid4">
+    <div class="stage"><span class="here-tag" style="background:var(--green)">DONE</span><h3 class="green" style="margin-top:8px">1 · One hit, one count</h3><p class="small">Count the edge, not the state.</p></div>
+    <div class="stage"><span class="here-tag" style="background:var(--green)">DONE</span><h3 class="green" style="margin-top:8px">2 · A clock that can't be fooled</h3><p class="small">millis(), debounce, the reaction timer.</p></div>
+    <div class="stage"><span class="here-tag" style="background:var(--green)">DONE</span><h3 class="green" style="margin-top:8px">3 · Light replaces the wire</h3><p class="small">Photoresistor, calibration, two lines.</p></div>
+    <div class="stage here"><span class="here-tag">TODAY</span><h3 class="amber" style="margin-top:8px">4 · The threat LED</h3><p class="small">Rebuild, then PWM makes it pulse.</p></div>
+  </div>
+</section>
+
+<!-- ================= REBUILD ================= -->
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Part 1 · Rebuild the node</div>
+  <h2>Gather your parts</h2>
+  <p>Your breadboards were taken apart, so we're rebuilding the whole node from scratch. It's only 8 connections, and you'll test it twice along the way. Check off each part:</p>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><b>ESP32</b> and a <b>data USB cable</b></span></label></li>
+    <li><label><input type="checkbox"><span><b>Breadboard</b></span></label></li>
+    <li><label><input type="checkbox"><span><b>4 male-to-female jumper wires</b> (one for each ESP32 pin we use: GND, 3V3, 23, 34)</span></label></li>
+    <li><label><input type="checkbox"><span><b>1 LED</b> (red if you have one)</span></label></li>
+    <li><label><input type="checkbox"><span><b>1 resistor, 220 Ω</b>: bands <span class="red">red</span>-<span class="red">red</span>-<span style="color:#b07d4a">brown</span></span></label></li>
+    <li><label><input type="checkbox"><span><b>1 photoresistor</b> (the little disc with a squiggly line on top)</span></label></li>
+    <li><label><input type="checkbox"><span><b>1 resistor, 10 kΩ</b>: bands <span style="color:#b07d4a">brown</span>-black-<span style="color:#e8a400">orange</span></span></label></li>
+  </ul>
+  <div class="callout"><b>Can't tell the resistors apart?</b> The 220 Ω has two red bands. The 10 kΩ has an orange band. Mixing them up is the #1 rebuild mistake.</div>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Part 1 · Breadboard refresher</div>
+  <h2>How your breadboard connects</h2>
+  <div class="grid2">
+    <div class="card"><h3 class="teal">Columns</h3><p>The short rows of 5 holes are connected inside by a metal strip. Anything plugged into the same column is connected. We'll call columns by letters like <b>A</b>, <b>B</b>, <b>C</b>. These are just names for "pick an empty column."</p></div>
+    <div class="card"><h3 class="amber">Rails</h3><p>The long lines along the edge are connected all the way across. We use two: the <b class="blue" style="color:#60a5fa">blue (–) rail</b> for ground, and the <b class="red">red (+) rail</b> next to it for 3.3 V.</p></div>
+  </div>
+  <div class="callout teal"><b>Your jumpers:</b> the <b>female</b> end (the socket) slides onto the ESP32's pin. The <b>male</b> end (the pin) pushes into the breadboard. Your ESP32 stays <i>off</i> the breadboard.</div>
+  <div class="callout red"><b>Unplug the USB cable</b> before you start, and keep it unplugged until a step says to plug it in.</div>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Step 1 of 3 · Power rails</div>
+  <h2>Ground and 3.3 V</h2>
+  <div class="card"><div class="buildSvg" data-now="gnd,v33"></div></div>
+  <div class="step"><span class="num">1</span><div>Find the ESP32 pin labeled <b>GND</b>. Put the female end of a jumper on it. Push the male end into the <b style="color:#60a5fa">blue (–) rail</b>.</div></div>
+  <div class="step"><span class="num">2</span><div>Find the pin labeled <b>3V3</b>. Put a jumper on it. Push the male end into the <b class="red">red (+) rail</b> right next to the blue one.</div></div>
+  <div class="callout red"><b>3V3, not VIN or 5V.</b> They're different pins. The sensor must get 3.3 V, or it can damage the ESP32.</div>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Step 2 of 3 · The threat LED</div>
+  <h2>LED on pin 23</h2>
+  <div class="card"><div class="buildSvg" data-now="w23,led,r220"></div></div>
+  <div class="step"><span class="num">3</span><div>Put a jumper on ESP32 pin <b>23</b>. Push the male end into an empty column near the left. Call it <b>column A</b>.</div></div>
+  <div class="step"><span class="num">4</span><div>LED: the <b>long leg (+)</b> goes in column A. The <b>short leg (–)</b> goes in the next empty column over, <b>column B</b>.</div></div>
+  <div class="step"><span class="num">5</span><div><b>220 Ω</b> resistor (red-red-brown): one leg in column B, the other leg in the <b style="color:#60a5fa">blue (–) rail</b>.</div></div>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Test 1 · the LED</div>
+  <h2>Blink check</h2>
+  <p>Plug in USB and upload this. Test before you build more, so a mistake is easy to find.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int ledPin = 23;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(ledPin, HIGH);
+  delay(300);
+  digitalWrite(ledPin, LOW);
+  delay(300);
+}</code></pre></div>
+  <table><tr><th>If…</th><th>Try this</th></tr>
+    <tr><td>It blinks</td><td>You're good. Unplug USB and go on.</td></tr>
+    <tr><td>Nothing at all</td><td>Flip the LED around: long leg goes to the pin 23 column. Check the resistor reaches the <b>blue</b> rail.</td></tr>
+    <tr><td>Very dim</td><td>You may have used the 10 kΩ instead of the 220 Ω. Check the bands.</td></tr>
+    <tr><td>Upload error</td><td>Tools → Board: <b>ESP32 Dev Module</b>. Tools → Port. Hold <b>BOOT</b> if stuck on "Connecting…"</td></tr>
+  </table>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Step 3 of 3 · The light sensor</div>
+  <h2>Photoresistor on pin 34</h2>
+  <div class="card"><div class="buildSvg" data-now="w34,ldr,r10k"></div></div>
+  <div class="step"><span class="num">6</span><div>USB unplugged. Put a jumper on ESP32 pin <b>34</b>. Push the male end into a new empty column, away from the LED. Call it <b>column C</b>.</div></div>
+  <div class="step"><span class="num">7</span><div><b>Photoresistor:</b> one leg in column C, the other leg in the <b class="red">red (+) rail</b>. Either way around is fine.</div></div>
+  <div class="step"><span class="num">8</span><div><b>10 kΩ</b> resistor (brown-black-orange): one leg in column C, the other leg in the <b style="color:#60a5fa">blue (–) rail</b>.</div></div>
+  <p class="small muted">Column C now holds three things: the wire to 34, a photoresistor leg, and a resistor leg. That's the voltage divider from last lesson.</p>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Test 2 · the sensor</div>
+  <h2>Light check</h2>
+  <p>Plug in USB, upload, and open <b>Tools → Serial Monitor</b> (or Serial Plotter) at 115200 baud.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int sensorPin = 34;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  Serial.println(analogRead(sensorPin));
+  delay(100);
+}</code></pre></div>
+  <p>Cover the sensor: the number should drop. Shine your flashlight on it: it should jump toward 4095.</p>
+  <table><tr><th>If…</th><th>Try this</th></tr>
+    <tr><td>Always 0 or close to it</td><td>The photoresistor isn't reaching the <b>red</b> rail, or the 3V3 wire is loose.</td></tr>
+    <tr><td>Always 4095</td><td>The 10 kΩ isn't reaching the <b>blue</b> rail, or you used the 220 Ω here by mistake.</td></tr>
+    <tr><td>Jumps around randomly</td><td>The pin 34 wire isn't in column C. Its pin is floating.</td></tr>
+  </table>
+</section>
+
+<section class="slide" data-section="Rebuild">
+  <div class="kicker">Rebuild complete</div>
+  <h2>Final check: all 8 connections</h2>
+  <div class="card"><div class="buildSvg" data-now=""></div></div>
+  <table class="wireTbl"><tr><th>From</th><th>To</th></tr>
+    <tr><td>ESP32 GND</td><td>blue (–) rail</td></tr>
+    <tr><td>ESP32 3V3</td><td>red (+) rail</td></tr>
+    <tr><td>ESP32 23</td><td>column A</td></tr>
+    <tr><td>LED long leg / short leg</td><td>column A / column B</td></tr>
+    <tr><td>220 Ω</td><td>column B → blue rail</td></tr>
+    <tr><td>ESP32 34</td><td>column C</td></tr>
+    <tr><td>Photoresistor</td><td>column C → red rail</td></tr>
+    <tr><td>10 kΩ</td><td>column C → blue rail</td></tr>
+  </table>
+</section>
+
+<!-- ================= CODE RECAP ================= -->
+<section class="slide" data-section="Code Recap">
+  <div class="kicker">Part 2 · Code recap</div>
+  <h2>How your node thinks</h2>
+  <div class="grid3">
+    <div class="card"><h3 class="teal">measureRoom()</h3><p>Runs once in <code>setup()</code>. Averages 50 light readings to learn how bright the room is, then sets a <b class="red">HIT</b> line and a lower <b class="teal">RESET</b> line.</p></div>
+    <div class="card"><h3 class="amber">lightHit()</h3><p>Returns <code>true</code> once, when a <b>new</b> beam rises above the HIT line. Won't count again until the light drops below RESET.</p></div>
+    <div class="card"><h3 class="red">loop()</h3><p>Asks three questions every pass, never waiting: <b>Time to attack?</b> <b>Hit in time?</b> <b>Too slow?</b> It uses <code>millis()</code> for every clock.</p></div>
+  </div>
+  <div class="q"><b>Quick check:</b> why does the node calibrate itself instead of using a fixed number like 2000?
+    <div class="opts"><button class="opt">it's faster</button><button class="opt" data-ok="1">every spot in the room has different light</button><button class="opt">analogRead can't go above 2000</button></div>
+    <div class="qx">Right. A window seat and a shadowy corner read very differently.</div></div>
+</section>
+
+<section class="slide" data-section="Code Recap">
+  <div class="kicker">Optional · full system test</div>
+  <h2>Run the Lesson 3 node</h2>
+  <p>Want to prove your whole rebuild works before we change anything? Upload last lesson's node and defend it once with your flashlight.</p>
+  <button class="revealBtn">Show the Lesson 3 node code</button>
+  <div class="revealBox">
+  <div class="code"><button class="copy">Copy</button><pre><code>const int sensorPin = 34;
+const int ledPin = 23;
+const unsigned long windowMs = 2000;
+
+int ambient = 0;
+int hitLevel = 0;
+int resetLevel = 0;
+bool beamOn = false;
+
+bool armed = false;
+unsigned long nextAttackTime = 0;
+unsigned long armedTime = 0;
+int blocked = 0;
+int escaped = 0;
+
+int measureRoom() {
+  long total = 0;
+  for (int i = 0; i < 50; i++) {
+    total += analogRead(sensorPin);
+    delay(20);
+  }
+  return total / 50;
+}
+
+bool lightHit() {
+  int level = analogRead(sensorPin);
+  bool hit = false;
+  if (!beamOn && level > hitLevel) {
+    beamOn = true;
+    hit = true;
+  }
+  if (beamOn && level < resetLevel) {
+    beamOn = false;
+  }
+  return hit;
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  Serial.println("Calibrating... keep flashlights away!");
+  ambient = measureRoom();
+  hitLevel = ambient + (4095 - ambient) / 2;
+  resetLevel = ambient + (4095 - ambient) / 4;
+  randomSeed(esp_random());
+  nextAttackTime = millis() + random(2000, 5000);
+  Serial.println("Node online. Defend it!");
+}
+
+void loop() {
+  bool hit = lightHit();
+  unsigned long now = millis();
+
+  if (!armed && now >= nextAttackTime) {
+    armed = true;
+    armedTime = now;
+    digitalWrite(ledPin, HIGH);
+    Serial.println("!!! NODE UNDER ATTACK !!!");
+  }
+
+  if (armed && hit) {
+    armed = false;
+    digitalWrite(ledPin, LOW);
+    blocked++;
+    Serial.print("BLOCKED in ");
+    Serial.print(now - armedTime);
+    Serial.println(" ms");
+    nextAttackTime = now + random(2000, 5000);
+  }
+
+  if (armed && now - armedTime > windowMs) {
+    armed = false;
+    digitalWrite(ledPin, LOW);
+    escaped++;
+    Serial.println("ESCAPED into an Antcar!");
+    nextAttackTime = now + random(2000, 5000);
+  }
+}</code></pre></div>
+  </div>
+</section>
+
+<!-- ================= PWM ================= -->
+<section class="slide bp" data-section="PWM">
+  <div class="kicker" style="color:var(--red)">Part 3 · The problem</div>
+  <h2>The LED has no drama.</h2>
+  <p class="lead">When your node is attacked, its LED just... turns on. Is there plenty of time, or is the clock almost out? You can't tell.</p>
+  <p class="lead">Game designers call a signal like this a <b>tell</b>: a movie bomb that beeps faster, a health bar that flashes when low. Today the node gets one: <span class="red"><b>slow pulsing when the attack starts, frantic pulsing when time's almost up.</b></span></p>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">The catch</div>
+  <h2>A pin can only be ON or OFF.</h2>
+  <p class="lead">To pulse, the LED has to fade smoothly between dim and bright. But an ESP32 output pin only has two settings: <b>3.3 V</b> or <b>0 V</b>. There's no "half."</p>
+  <p class="lead">So how do you make an LED look half as bright? <span class="amber"><b>You cheat, by being fast.</b></span></p>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">Build 1 · fake brightness by hand</div>
+  <h2>Blink it faster and faster</h2>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int ledPin = 23;
+int onMs = 100;    // how long ON each cycle
+int offMs = 100;   // how long OFF each cycle
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(ledPin, HIGH);
+  delay(onMs);
+  digitalWrite(ledPin, LOW);
+  delay(offMs);
+}</code></pre></div>
+  <p>Upload it. Then change <code>onMs</code> and <code>offMs</code>, re-upload, and fill in this table in your notebook:</p>
+  <table><tr><th>onMs</th><th>offMs</th><th>What do you see? (blinking? flickering? steady? how bright?)</th></tr>
+    <tr><td>100</td><td>100</td><td></td></tr><tr><td>20</td><td>20</td><td></td></tr><tr><td>5</td><td>5</td><td></td></tr><tr><td>1</td><td>9</td><td></td></tr><tr><td>9</td><td>1</td><td></td></tr>
+  </table>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">What just happened</div>
+  <h2>PWM: Pulse Width Modulation</h2>
+  <div class="card"><svg viewBox="0 0 640 220" style="width:100%">
+    <g font-size="13" fill="#9aa6bd">
+      <text x="10" y="40">25%</text><text x="10" y="110">50%</text><text x="10" y="180">90%</text>
+    </g>
+    <path d="M60 50 H100 V20 H60 M60 50 V20" stroke="none"/>
+    <path d="M60 50 V20 H95 V50 H200 V20 H235 V50 H340 V20 H375 V50 H480 V20 H515 V50 H620" stroke="#ff4d5e" stroke-width="3" fill="none"/>
+    <path d="M60 120 V90 H130 V120 H200 V90 H270 V120 H340 V90 H410 V120 H480 V90 H550 V120 H620" stroke="#ffb547" stroke-width="3" fill="none"/>
+    <path d="M60 190 V160 H186 V190 H200 V160 H326 V190 H340 V160 H466 V190 H480 V160 H606 V190 H620" stroke="#4ade80" stroke-width="3" fill="none"/>
+    <text x="340" y="215" fill="#cfd6e4" font-size="13" text-anchor="middle">same speed, different ON-time per cycle → different brightness</text>
+  </svg></div>
+  <p style="margin-top:14px">Switch the LED on and off faster than about 60 times a second, and your eye can't see the flicker. It blends the flashes into a steady glow. How bright the glow looks depends on what fraction of the time the LED is on.</p>
+  <p>That fraction is the <b>duty cycle</b>. 1 ms on and 9 ms off = 10% duty = dim. 9 on and 1 off = 90% duty = bright. Changing the width of the ON pulse to control power is <b>Pulse Width Modulation</b>.</p>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">Try it</div>
+  <h2>PWM simulator</h2>
+  <div class="grid2">
+    <div>
+      <label class="small muted">Duty cycle: <b id="pwmDutyL">50%</b></label>
+      <input type="range" id="pwmDuty" min="0" max="100" value="50">
+      <label class="small muted" style="margin-top:14px;display:block">Speed: <b id="pwmFreqL">2 Hz</b> (switches per second)</label>
+      <input type="range" id="pwmFreq" min="0" max="100" value="10">
+      <p class="small muted" style="margin-top:12px">Start slow and watch the LED blink. Then drag the speed up past about 60 Hz and watch the blinking turn into a steady glow. Then change the duty cycle.</p>
+    </div>
+    <div class="pwmWrap" style="text-align:center">
+      <div class="pwmLed" id="pwmLed"></div>
+      <canvas id="pwmCv" width="600" height="140"></canvas>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">The easy way</div>
+  <h2>analogWrite(pin, 0–255)</h2>
+  <p>You don't have to switch the pin yourself. The ESP32 has hardware built just for PWM. You tell it a brightness, and it does the fast switching on its own, about 1,000 times a second, while your program keeps running.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>analogWrite(ledPin, 0);     // 0% duty: off
+analogWrite(ledPin, 64);    // 25%: dim
+analogWrite(ledPin, 128);   // 50%: medium
+analogWrite(ledPin, 255);   // 100%: full brightness</code></pre></div>
+  <div class="callout"><b>Rule:</b> once you <code>analogWrite</code> a pin, keep using <code>analogWrite</code> for it. Use <code>0</code> for off and <code>255</code> for fully on. Mixing in <code>digitalWrite</code> on the same pin can confuse the ESP32's PWM hardware.</div>
+  <div class="callout teal"><b>Coming soon:</b> PWM isn't just for LEDs. It's how the Antcars will control <b>motor speed</b>. Same trick: switch the power on and off fast, and the motor feels the average.</div>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">Build 2 · breathing, no delay()</div>
+  <h2>Brightness from the clock</h2>
+  <p>A node can't take naps, so no <code>delay()</code>. Instead, we <b>calculate</b> the brightness from <code>millis()</code> every pass through <code>loop()</code>.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int ledPin = 23;
+const unsigned long period = 2000;   // one full breath every 2 seconds
+
+void setup() {
+  analogWrite(ledPin, 0);
+}
+
+void loop() {
+  unsigned long t = millis() % period;   // where we are in this breath: 0 to 1999
+
+  int brightness;
+  if (t < period / 2) {
+    brightness = map(t, 0, period / 2, 0, 255);        // first half: getting brighter
+  } else {
+    brightness = map(t, period / 2, period, 255, 0);   // second half: getting dimmer
+  }
+
+  analogWrite(ledPin, brightness);
+}</code></pre></div>
+</section>
+
+<section class="slide" data-section="PWM">
+  <div class="kicker">Build 2 · how it works</div>
+  <h2>Two new tools: % and map()</h2>
+  <div class="grid2">
+    <div class="card"><h3 class="amber">% (modulo)</h3><p>The <b>remainder</b> after dividing. <code>millis() % 2000</code> counts 0, 1, 2 … 1999, then starts over at 0, forever.</p><p class="small muted">It's clock arithmetic: 14:00 is 2 o'clock because 14 % 12 = 2.</p></div>
+    <div class="card"><h3 class="teal">map(value, fromLow, fromHigh, toLow, toHigh)</h3><p>Converts a number from one range to another. <code>map(t, 0, 1000, 0, 255)</code>: t = 0 gives 0, t = 500 gives 127, t = 1000 gives 255.</p></div>
+  </div>
+  <div class="callout" style="margin-top:16px"><b>Try it:</b> change <code>period</code> to 500, then to 5000. Write in your notebook how the breathing changes. Bonus: what number makes it look like a heartbeat?</div>
+</section>
+
+<section class="slide bp" data-section="Build 3">
+  <div class="kicker" style="color:var(--red)">Build 3 · the threat LED</div>
+  <h2>Faster as time runs out</h2>
+  <div class="card"><svg viewBox="0 0 640 170" style="width:100%">
+    <path id="chirp" d="" stroke="#ff4d5e" stroke-width="3" fill="none"/>
+    <line x1="30" y1="150" x2="620" y2="150" stroke="#2a3550"/>
+    <text x="30" y="166" fill="#9aa6bd" font-size="12">attack starts</text>
+    <text x="620" y="166" fill="#9aa6bd" font-size="12" text-anchor="end">2 s: escaped</text>
+    <text x="80" y="20" fill="#cfd6e4" font-size="13">1.5 pulses/sec: "you have time"</text>
+    <text x="620" y="20" fill="#ff4d5e" font-size="13" text-anchor="end" font-weight="700">10 pulses/sec: HURRY</text>
+  </svg></div>
+  <p style="margin-top:14px">While the node is armed, it pulses. The pulse rate starts slow and climbs as time runs out. We track a value called <b>urgency</b>: 0.0 when the attack starts, 1.0 when time is up.</p>
+  <p><b>The spinning dial:</b> picture a dial that goes around once per pulse. Each pass through <code>loop()</code>, we nudge it forward. Bigger nudges = faster pulsing. The dial's position, called <code>phase</code> (0.0 to 1.0), decides the brightness: dim at 0, brightest at 0.5, dim again at 1.0.</p>
+  <p class="small muted"><code>float</code> is a new variable type: numbers with decimals, like 0.25 or 1.5. We need it because phase and urgency live between 0 and 1.</p>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Build 3 · the code</div>
+  <h2>The complete defense node</h2>
+  <p class="small muted">New parts are marked <code>// NEW</code>. Everything else is your Lesson 3 node.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int sensorPin = 34;
+const int ledPin = 23;
+const unsigned long windowMs = 2000;
+
+int ambient = 0;
+int hitLevel = 0;
+int resetLevel = 0;
+bool beamOn = false;
+
+bool armed = false;
+unsigned long nextAttackTime = 0;
+unsigned long armedTime = 0;
+int blocked = 0;
+int escaped = 0;
+
+float phase = 0.0;                 // NEW: where the dial is, 0.0 to 1.0
+unsigned long lastPulseUpdate = 0; // NEW: when we last nudged the dial
+
+int measureRoom() {
+  long total = 0;
+  for (int i = 0; i < 50; i++) {
+    total += analogRead(sensorPin);
+    delay(20);
+  }
+  return total / 50;
+}
+
+bool lightHit() {
+  int level = analogRead(sensorPin);
+  bool hit = false;
+  if (!beamOn && level > hitLevel) {
+    beamOn = true;
+    hit = true;
+  }
+  if (beamOn && level < resetLevel) {
+    beamOn = false;
+  }
+  return hit;
+}
+
+// NEW: pulse the LED faster as time runs out
+void updateThreatLED(unsigned long now) {
+  float urgency = (float)(now - armedTime) / windowMs;  // 0.0 → 1.0
+  float pulsesPerSecond = 1.5 + 8.5 * urgency;          // 1.5 → 10
+
+  float seconds = (now - lastPulseUpdate) / 1000.0;     // time since last nudge
+  lastPulseUpdate = now;
+
+  phase = phase + pulsesPerSecond * seconds;            // nudge the dial
+  if (phase >= 1.0) {
+    phase = phase - 1.0;                                // went all the way around
+  }
+
+  int brightness;
+  if (phase < 0.5) {
+    brightness = phase * 2 * 255;                       // getting brighter
+  } else {
+    brightness = (1.0 - phase) * 2 * 255;               // getting dimmer
+  }
+  analogWrite(ledPin, brightness);
+}
+
+void setup() {
+  Serial.begin(115200);
+  analogWrite(ledPin, 0);                               // NEW: analogWrite only
+  Serial.println("Calibrating... keep flashlights away!");
+  ambient = measureRoom();
+  hitLevel = ambient + (4095 - ambient) / 2;
+  resetLevel = ambient + (4095 - ambient) / 4;
+  randomSeed(esp_random());
+  nextAttackTime = millis() + random(2000, 5000);
+  Serial.println("Node online. Defend it!");
+}
+
+void loop() {
+  bool hit = lightHit();
+  unsigned long now = millis();
+
+  if (!armed && now >= nextAttackTime) {
+    armed = true;
+    armedTime = now;
+    phase = 0.5;                  // NEW: start at the brightest point
+    lastPulseUpdate = now;        // NEW
+    Serial.println("!!! NODE UNDER ATTACK !!!");
+  }
+
+  if (armed) {
+    updateThreatLED(now);         // NEW
+  }
+
+  if (armed && hit) {
+    armed = false;
+    analogWrite(ledPin, 0);       // NEW: was digitalWrite
+    blocked++;
+    Serial.print("BLOCKED in ");
+    Serial.print(now - armedTime);
+    Serial.println(" ms");
+    nextAttackTime = now + random(2000, 5000);
+  }
+
+  if (armed && now - armedTime > windowMs) {
+    armed = false;
+    analogWrite(ledPin, 0);       // NEW: was digitalWrite
+    escaped++;
+    Serial.println("ESCAPED into an Antcar!");
+    nextAttackTime = now + random(2000, 5000);
+  }
+}</code></pre></div>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Build 3 · what changed</div>
+  <h2>Only the LED got smarter.</h2>
+  <table><tr><th>Code</th><th>What it does</th></tr>
+    <tr><td><code>(float)(now - armedTime) / windowMs</code></td><td>Fraction of the window used up. <code>(float)</code> forces decimal math. Without it, 1000 / 2000 would round down to 0.</td></tr>
+    <tr><td><code>1.5 + 8.5 * urgency</code></td><td>At urgency 0: 1.5 pulses/sec. At urgency 1: 1.5 + 8.5 = 10 pulses/sec.</td></tr>
+    <tr><td><code>phase + pulsesPerSecond * seconds</code></td><td>Nudge the dial forward. A faster pulse rate means a bigger nudge.</td></tr>
+    <tr><td><code>phase = 0.5</code> at attack start</td><td>Begin at full brightness, so you notice the attack instantly.</td></tr>
+    <tr><td><code>analogWrite(ledPin, 0)</code></td><td>Turn off with PWM, not <code>digitalWrite</code>. Remember the rule.</td></tr>
+  </table>
+  <div class="callout">The detection, calibration, timing, and scoring are untouched. We added one function and called it from one place. That's how real programs grow.</div>
+</section>
+
+<section class="slide bp" data-section="Build 3">
+  <div class="kicker" style="color:var(--red)">Build 3 · try it</div>
+  <h2>Feel the clock</h2>
+  <p>Here's how your node should look. Click the LED (or press space) to block before it escapes. Then upload Build 3 and play it for real with your flashlight.</p>
+  <div class="rtBox" id="rtBox">
+    <div class="nodeLed" id="rtLed"></div>
+    <div class="rtMsg" id="rtMsg">Press Start</div>
+    <button class="bpStart" id="rtStart">Start</button>
+    <div class="rtStats"><div>blocked<b id="rtB">0</b></div><div>escaped<b id="rtE">0</b></div></div>
+  </div>
+  <div class="callout" style="margin-top:14px"><b>In your notebook:</b> does the pulsing change how you play? Do you react differently when it's frantic?</div>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Level up (optional)</div>
+  <h2>Finished early? Polish your node.</h2>
+  <div class="grid3">
+    <div class="card"><h3 class="green">Victory flash</h3><p>When you block, flash the LED fully on 3 times quickly. Challenge: do it with <code>millis()</code>, not <code>delay()</code>.</p></div>
+    <div class="card"><h3 class="red">Death fade</h3><p>When a signal escapes, fade the LED slowly from 255 down to 0 over one second, like the node is dying.</p></div>
+    <div class="card"><h3 class="amber">Tune the tell</h3><p>Change <code>1.5</code> and <code>8.5</code>. What start and end speeds feel the most tense? Write your favorite numbers in your notebook.</p></div>
+  </div>
+</section>
+
+<!-- ================= WRAP ================= -->
+<section class="slide bp" data-section="Wrap-up">
+  <div class="kicker" style="color:var(--red)">Milestone</div>
+  <h2>Your defense node is complete.</h2>
+  <ul class="check">
+    <li><label><input type="checkbox" checked disabled><span>Detects a <b>new</b> flashlight hit, once</span></label></li>
+    <li><label><input type="checkbox" checked disabled><span>Calibrates to its own spot in the room</span></label></li>
+    <li><label><input type="checkbox" checked disabled><span>Attacks at random times and counts down without ever stopping</span></label></li>
+    <li><label><input type="checkbox" checked disabled><span>Shows urgency with a pulsing threat LED</span></label></li>
+  </ul>
+  <p class="lead" style="margin-top:16px">Next: the <b class="amber">Antcar</b>. First lesson: <b>two eyes, no wheels</b>. Two photoresistors decide which side is brighter, so the robot will know which way to turn.</p>
+</section>
+
+<section class="slide" data-section="Wrap-up">
+  <div class="kicker">Wrap-up</div>
+  <h2>Before you go to your project</h2>
+  <p><b>Answer in your engineering notebook:</b></p>
+  <div class="step"><span class="num">1</span><div>A pin can only be ON or OFF. How does PWM make an LED look half-bright?</div></div>
+  <div class="step"><span class="num">2</span><div>What is <b>duty cycle</b>? What duty cycle is <code>analogWrite(ledPin, 64)</code>?</div></div>
+  <div class="step"><span class="num">3</span><div>What does <code>millis() % 2000</code> do?</div></div>
+  <div class="step"><span class="num">4</span><div>What is a game "tell"? Name one from a video game or movie.</div></div>
+  <p style="margin-top:20px"><b>You're done when:</b></p>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>My rebuilt node passed the blink check and the light check.</span></label></li>
+    <li><label><input type="checkbox"><span>Build 1: I filled in the onMs/offMs table.</span></label></li>
+    <li><label><input type="checkbox"><span>Build 2: my LED breathed with no delay().</span></label></li>
+    <li><label><input type="checkbox"><span>Build 3: my node pulsed faster as time ran out, and I blocked an attack with a flashlight.</span></label></li>
+    <li><label><input type="checkbox"><span>I answered the four questions in my notebook.</span></label></li>
+  </ul>
+</section>
+
+</main>
+<footer>
+  <button class="nav" id="prev">← Back</button>
+  <div class="bar"><i id="barFill"></i></div>
+  <span id="count"></span>
+  <button class="nav" id="next">Next →</button>
+</footer>
+
+<template id="boardTpl">
+<svg viewBox="0 0 680 320" style="width:100%">
+  <g data-g="base">
+    <rect x="20" y="20" width="170" height="260" rx="10" fill="#1f2a3a" stroke="#0d131c" stroke-width="2"/>
+    <text x="80" y="160" fill="#cfd6e4" font-size="16" text-anchor="middle" font-weight="700">ESP32</text>
+    <g font-size="14" font-weight="700" text-anchor="end" fill="#ffd34d">
+      <circle cx="180" cy="50" r="7" fill="#e0b84a"/><text x="166" y="55">23</text>
+      <circle cx="180" cy="95" r="7" fill="#e0b84a"/><text x="166" y="100">3V3</text>
+      <circle cx="180" cy="150" r="7" fill="#e0b84a"/><text x="166" y="155">34</text>
+      <circle cx="180" cy="255" r="7" fill="#e0b84a"/><text x="166" y="260">GND</text>
+    </g>
+    <rect x="285" y="65" width="385" height="245" rx="10" fill="#f3f1ea" stroke="#b9b4a6" stroke-width="2"/>
+    <line x1="300" y1="262" x2="655" y2="262" stroke="#2a62d6" stroke-width="3"/>
+    <line x1="300" y1="290" x2="655" y2="290" stroke="#d33" stroke-width="3"/>
+    <text x="660" y="256" fill="#2a62d6" font-size="11" text-anchor="end" font-weight="700">blue (–) = GND</text>
+    <text x="660" y="305" fill="#d33" font-size="11" text-anchor="end" font-weight="700">red (+) = 3.3 V</text>
+    <g fill="#9a9a9a">
+      <rect x="316" y="96" width="8" height="8"/><rect x="316" y="116" width="8" height="8"/><rect x="316" y="136" width="8" height="8"/><rect x="316" y="156" width="8" height="8"/><rect x="316" y="176" width="8" height="8"/>
+      <rect x="366" y="96" width="8" height="8"/><rect x="366" y="116" width="8" height="8"/><rect x="366" y="136" width="8" height="8"/><rect x="366" y="156" width="8" height="8"/><rect x="366" y="176" width="8" height="8"/>
+      <rect x="496" y="96" width="8" height="8"/><rect x="496" y="116" width="8" height="8"/><rect x="496" y="136" width="8" height="8"/><rect x="496" y="156" width="8" height="8"/><rect x="496" y="176" width="8" height="8"/>
+    </g>
+    <g fill="#777" font-size="11"><text x="320" y="198" text-anchor="middle">col A</text><text x="381" y="198">col B</text><text x="508" y="198">col C</text></g>
+  </g>
+  <g data-g="gnd"><path d="M180 255 C 230 255, 270 262, 315 262" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="v33"><path d="M180 95 C 240 95, 245 292, 310 290" stroke="#d33" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w23"><path d="M180 50 C 250 50, 295 60, 320 100" stroke="#ff7a1a" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="led">
+    <path d="M320 140 L 333 140 M357 140 L 370 140" stroke="#888" stroke-width="3"/>
+    <circle cx="345" cy="140" r="12" fill="#ff4d5e" stroke="#a11" stroke-width="2"/>
+    <text x="331" y="124" fill="#a11" font-size="12" font-weight="700">+</text>
+    <text x="345" y="167" fill="#a11" font-size="11" text-anchor="middle" font-weight="700">LED</text>
+  </g>
+  <g data-g="r220">
+    <path d="M370 180 V186" stroke="#888" stroke-width="3"/>
+    <rect x="362" y="186" width="16" height="42" rx="5" fill="#d9b98a" stroke="#8a6a3a"/>
+    <rect x="362" y="194" width="16" height="4" fill="#a33"/><rect x="362" y="202" width="16" height="4" fill="#a33"/><rect x="362" y="210" width="16" height="4" fill="#5a3a1a"/>
+    <path d="M370 228 V262" stroke="#888" stroke-width="3"/>
+    <text x="356" y="212" fill="#5a4100" font-size="12" text-anchor="end" font-weight="700">220 Ω</text>
+  </g>
+  <g data-g="w34"><path d="M180 150 C 250 150, 280 40, 400 45 S 488 70, 500 100" stroke="#3ad6c5" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="ldr">
+    <path d="M500 180 L 470 214" stroke="#aaa" stroke-width="3"/>
+    <circle cx="462" cy="228" r="15" fill="#d9c27a" stroke="#8a6a14" stroke-width="2"/>
+    <path d="M452 222 H472 M452 228 H472 M452 234 H472" stroke="#8a3a14" stroke-width="2"/>
+    <path d="M458 242 L 452 290" stroke="#aaa" stroke-width="3"/>
+    <text x="482" y="240" fill="#8a6a14" font-size="12" font-weight="700">photoresistor</text>
+  </g>
+  <g data-g="r10k">
+    <path d="M500 160 L 601 184" stroke="#aaa" stroke-width="3"/>
+    <rect x="592" y="184" width="18" height="44" rx="6" fill="#d9b98a" stroke="#8a6a3a"/>
+    <rect x="592" y="192" width="18" height="4" fill="#5a3a1a"/><rect x="592" y="200" width="18" height="4" fill="#111"/><rect x="592" y="208" width="18" height="4" fill="#e8a400"/>
+    <path d="M601 228 V262" stroke="#aaa" stroke-width="3"/>
+    <text x="616" y="210" fill="#5a4100" font-size="12" font-weight="700">10 kΩ</text>
+  </g>
+</svg>
+</template>
+
+<script>
+(function(){
+  // ---------- build diagrams ----------
+  const ORDER=['base','gnd','v33','w23','led','r220','w34','ldr','r10k'];
+  const tpl=document.getElementById('boardTpl').innerHTML;
+  document.querySelectorAll('.buildSvg').forEach(el=>{
+    el.innerHTML=tpl;
+    const now=el.dataset.now?el.dataset.now.split(','):[];
+    const lastIdx=now.length?Math.max(...now.map(n=>ORDER.indexOf(n))):ORDER.length-1;
+    el.querySelectorAll('[data-g]').forEach(g=>{
+      const name=g.dataset.g,idx=ORDER.indexOf(name);
+      if(now.includes(name))g.classList.add('g-now');
+      else if(idx>lastIdx)g.classList.add('g-future');
+    });
+  });
+
+  const slides=[...document.querySelectorAll('.slide')];
+  const main=document.getElementById('main');
+  const KEY='bp_lesson4_slide';
+  let cur=0;
+  try{const s=parseInt(localStorage.getItem(KEY),10);if(s>=0&&s<slides.length)cur=s;}catch(e){}
+  try{const h=parseInt(location.hash.slice(1),10);if(h>=1&&h<=slides.length)cur=h-1;}catch(e){}
+  let pwmActive=false;
+  function show(i){
+    cur=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+    document.getElementById('sec').textContent=slides[cur].dataset.section||'';
+    document.getElementById('count').textContent=(cur+1)+' / '+slides.length;
+    document.getElementById('barFill').style.width=((cur+1)/slides.length*100)+'%';
+    document.getElementById('prev').disabled=cur===0;
+    document.getElementById('next').disabled=cur===slides.length-1;
+    main.scrollTop=0;
+    pwmActive=slides[cur].contains(document.getElementById('pwmLed'));
+    if(!slides[cur].contains(document.getElementById('rtBox')))rtStop();
+    try{localStorage.setItem(KEY,cur);}catch(e){}
+  }
+  document.getElementById('prev').onclick=()=>show(cur-1);
+  document.getElementById('next').onclick=()=>show(cur+1);
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key===' '&&slides[cur].contains(document.getElementById('rtBox'))){e.preventDefault();rtHit();return;}
+    if(e.key==='ArrowRight'||e.key==='PageDown')show(cur+1);
+    if(e.key==='ArrowLeft'||e.key==='PageUp')show(cur-1);
+    if(e.key==='Home')show(0);
+  });
+
+  // syntax highlight + copy
+  document.querySelectorAll('.code').forEach(box=>{
+    const codeEl=box.querySelector('code');const raw=codeEl.textContent;
+    const esc=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    codeEl.innerHTML=esc.replace(/(\/\/.*$)|("(?:[^"\\]|\\.)*")|\b(const|int|void|if|else|return|unsigned|long|bool|for|float)\b|\b(HIGH|LOW|INPUT_PULLUP|OUTPUT|INPUT|true|false)\b|\b(pinMode|digitalRead|digitalWrite|analogRead|analogWrite|map|delay|millis|random|randomSeed|esp_random|Serial|begin|println|print|setup|loop|measureRoom|lightHit|updateThreatLED)\b|\b(\d+(?:\.\d+)?)\b/gm,
+      (m,c,s,k,co,f,n)=>c?'<span class="tm">'+c+'</span>':s?'<span class="ts">'+s+'</span>':k?'<span class="tk">'+k+'</span>':co?'<span class="tc">'+co+'</span>':f?'<span class="tf">'+f+'</span>':'<span class="tn">'+n+'</span>');
+    const b=box.querySelector('.copy');
+    b.onclick=()=>{
+      const done=()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);};
+      function fallback(){const t=document.createElement('textarea');t.value=raw;document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){}t.remove();}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(raw).then(done,fallback);}else fallback();
+    };
+  });
+  document.querySelectorAll('.revealBtn').forEach(b=>b.onclick=()=>{b.nextElementSibling.classList.add('show');b.style.display='none';});
+  document.querySelectorAll('.q').forEach(q=>{
+    q.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+      if(o.dataset.ok){o.classList.add('right');q.querySelector('.qx').classList.add('show');}
+      else{o.classList.add('wrong');}
+    });
+  });
+
+  // chirp diagram
+  (function(){
+    let d='',ph=0.5,x0=30,x1=620,steps=900;
+    for(let i=0;i<=steps;i++){const u=i/steps;const x=x0+u*(x1-x0);const rate=1.5+8.5*u;ph+=rate*(2/steps);ph%=1;const b=ph<.5?ph*2:(1-ph)*2;const y=148-b*110;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}
+    document.getElementById('chirp').setAttribute('d',d);
+  })();
+
+  // PWM sim
+  const dutyS=document.getElementById('pwmDuty'),freqS=document.getElementById('pwmFreq'),pled=document.getElementById('pwmLed'),pcv=document.getElementById('pwmCv'),pcx=pcv.getContext('2d');
+  const freqOf=v=>Math.round(Math.pow(10,v/100*Math.log10(300))*10)/10||1; // 1..300 Hz
+  function labels(){document.getElementById('pwmDutyL').textContent=dutyS.value+'%';document.getElementById('pwmFreqL').textContent=freqOf(freqS.value)+' Hz';}
+  dutyS.oninput=freqS.oninput=labels;labels();
+  function drawWave(){
+    const W=pcv.width,H=pcv.height,duty=dutyS.value/100,f=freqOf(freqS.value);
+    pcx.fillStyle='#05080e';pcx.fillRect(0,0,W,H);
+    const cycles=Math.min(f,30);const cw=W/cycles;
+    pcx.strokeStyle='#ff4d5e';pcx.lineWidth=2.5;pcx.beginPath();
+    const hi=25,lo=H-25;let first=true;
+    for(let c=0;c<cycles;c++){const x=c*cw;const xo=x+cw*duty;
+      if(first){pcx.moveTo(x,duty>0?hi:lo);first=false;}else pcx.lineTo(x,duty>0?hi:lo);
+      pcx.lineTo(xo,duty>0?hi:lo);pcx.lineTo(xo,lo);pcx.lineTo(x+cw,lo);if(duty>0&&duty<1)pcx.lineTo(x+cw,hi);}
+    pcx.stroke();
+    pcx.fillStyle='#9aa6bd';pcx.font='12px monospace';pcx.fillText(f>30?'1 second (showing 30 of '+f+' cycles)':'1 second',8,14);
+  }
+  (function anim(t){
+    if(pwmActive){
+      const duty=dutyS.value/100,f=freqOf(freqS.value);
+      let on;
+      if(f<45){on=((t/1000*f)%1)<duty;pled.style.opacity=on?1:0.08;}
+      else{pled.style.opacity=(0.08+0.92*duty).toFixed(2);}
+      drawWave();
+    }
+    requestAnimationFrame(anim);
+  })(0);
+
+  // threat LED sim
+  const led=document.getElementById('rtLed'),msg=document.getElementById('rtMsg'),start=document.getElementById('rtStart');
+  const rt={running:false,armed:false,armedAt:0,phase:0.5,last:0,timer:null,b:0,e:0,raf:null};
+  function setLed(b){led.style.background='rgb('+Math.round(42+213*b)+','+Math.round(32+45*b)+','+Math.round(48+46*b)+')';led.style.boxShadow=b>0.05?'0 0 '+Math.round(45*b)+'px #ff4d5e':'none';}
+  function pulse(t){
+    if(!rt.armed)return;
+    const el=t-rt.armedAt;
+    if(el>2000){rt.armed=false;setLed(0);rt.e++;document.getElementById('rtE').textContent=rt.e;msg.innerHTML='<span class="red">ESCAPED into an Antcar!</span>';schedule();return;}
+    const rate=1.5+8.5*(el/2000);rt.phase+=rate*((t-rt.last)/1000);rt.last=t;rt.phase%=1;
+    setLed(rt.phase<.5?rt.phase*2:(1-rt.phase)*2);
+    rt.raf=requestAnimationFrame(pulse);
+  }
+  function schedule(){rt.timer=setTimeout(()=>{rt.armed=true;rt.armedAt=performance.now();rt.last=rt.armedAt;rt.phase=0.5;msg.innerHTML='<span class="red">!!! NODE UNDER ATTACK !!!</span>';rt.raf=requestAnimationFrame(pulse);},1500+Math.random()*2500);}
+  function rtHit(){
+    if(!rt.running)return;
+    if(rt.armed){rt.armed=false;cancelAnimationFrame(rt.raf);const ms=Math.round(performance.now()-rt.armedAt);rt.b++;document.getElementById('rtB').textContent=rt.b;
+      setLed(0);led.style.background='#4ade80';led.style.boxShadow='0 0 40px #4ade80';setTimeout(()=>{if(!rt.armed)setLed(0);},250);
+      msg.innerHTML='<span class="green">BLOCKED in '+ms+' ms</span>';schedule();}
+    else msg.innerHTML='<span class="amber">Wait for the attack!</span>';
+  }
+  function rtStop(){rt.running=false;rt.armed=false;clearTimeout(rt.timer);cancelAnimationFrame(rt.raf);setLed(0);start.style.display='inline-block';start.textContent=rt.b||rt.e?'Play again':'Start';}
+  led.addEventListener('pointerdown',e=>{e.preventDefault();rtHit();});
+  start.onclick=()=>{rt.running=true;rt.b=0;rt.e=0;['rtB','rtE'].forEach(id=>document.getElementById(id).textContent=0);start.style.display='none';msg.textContent='Watch the node…';schedule();};
+  setLed(0);
+  show(cur);
+})();
+</script>
+</body>
+</html>
